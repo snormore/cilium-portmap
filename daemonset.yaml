@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cilium-portmap
+  labels:
+    app: cilium-portmap
+spec:
+  selector:
+    matchLabels:
+      name: cilium-portmap
+  template:
+    metadata:
+      labels:
+        name: cilium-portmap
+    spec:
+      containers:
+      - name: cilium-portmap
+        # securityContext:
+        #   privileged: true
+        image: snormore/cilium-portmap:latest
+        volumeMounts:
+          - name: host-etc-cni-netd
+            mountPath: /host_etc_cni_netd
+      volumes:
+        - name: host-etc-cni-netd
+          hostPath:
+            path: /etc/cni/net.d
