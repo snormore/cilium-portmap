@@ -44,7 +44,6 @@ If you deploy this workload, a pod will appear on a node serving port `80` via `
 
 ```json
 {
-    "cniVersion": "0.3.1",
     "name": "cilium-portmap",
     "plugins": [
             {
