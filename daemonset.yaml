@@ -15,8 +15,6 @@ spec:
     spec:
       containers:
       - name: cilium-portmap
-        # securityContext:
-        #   privileged: true
         image: snormore/cilium-portmap:latest
         volumeMounts:
           - name: host-etc-cni-netd
