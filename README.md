@@ -1,1 +1,1 @@
-Enable hostPort support via CNI configuration for Cilium.
+If you are using Cilium and would like to use `hostPort` on your workloads, then you will need to [enable support via configuration](http://docs.cilium.io/en/v1.4/kubernetes/configuration/?highlight=portmap#enabling-hostport-support-via-cni-configuration). This Docker image and DaemonSet does exactly that by adding a `/etc/cni/net.d/00-cilium-portmap.conflist` to every node in your Kubernetes cluster.
