@@ -25,3 +25,5 @@ spec:
           hostPath:
             path: /etc/cni/net.d
       priorityClassName: system-node-critical
+      tolerations:
+      - operator: "Exists"
