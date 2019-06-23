@@ -24,3 +24,4 @@ spec:
         - name: host-etc-cni-netd
           hostPath:
             path: /etc/cni/net.d
+      priorityClassName: system-node-critical
