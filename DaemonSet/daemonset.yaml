@@ -17,13 +17,14 @@ spec:
       containers:
       - name: cilium-portmap
         image: snormore/cilium-portmap:latest
+        imagePullPolicy: IfNotPresent
         volumeMounts:
-          - name: host-etc-cni-netd
-            mountPath: /host_etc_cni_netd
+          - name: etc-cni-netd
+            mountPath: /host/etc/cni/net.d
       volumes:
-        - name: host-etc-cni-netd
+        - name: etc-cni-netd
           hostPath:
-            path: /etc/cni/net.d
+            path: /host/etc/cni/net.d
       priorityClassName: system-node-critical
       tolerations:
       - operator: "Exists"

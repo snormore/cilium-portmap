@@ -1,6 +1,22 @@
-If you are using Cilium and would like to use `hostPort` on your workloads (without `hostNetwork: true`), then you will need to [enable support via configuration](http://docs.cilium.io/en/v1.4/kubernetes/configuration/?highlight=portmap#enabling-hostport-support-via-cni-configuration). This Docker image and DaemonSet does exactly that by adding a `/etc/cni/net.d/00-cilium-portmap.conflist` to every node in your Kubernetes cluster.
+If you are using Cilium and would like to use `hostPort` on your workloads (without `hostNetwork: true`), then you will need to [enable support via configuration](http://docs.cilium.io/en/v1.4/kubernetes/configuration/?highlight=portmap#enabling-hostport-support-via-cni-configuration). This Docker image does exactly that by adding a `/etc/cni/net.d/00-cilium-portmap.conflist` to every node in your Kubernetes cluster.
 
-## Deploy
+## Deploy as an initContainer
+
+The most reliable way to install this is as an `initContainer` on the existing Cilium agent Daemonset.
+
+Add the following to the `cilium` DaemonSet under `initContainers` as the first in the list:
+```
+      - name: cilium-portmap
+        image: snormore/cilium-portmap-init
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - mountPath: /host/etc/cni/net.d
+          name: etc-cni-netd
+```
+
+## Deploy as a DaemonSet
+
+You can deploy as a separate DaemonSet, but keep in mind that there can be a race condition between Cilium, our portmap DaemonSet, and any workloads/pods you deploy at the same time. If you see that your `hostPort` is not in effect, you may have to restart the pod for Cilium/CNI to detect it and add the necessary `iptables` rule. 
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/snormore/cilium-portmap/master/daemonset.yaml
