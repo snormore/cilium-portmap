@@ -19,7 +19,7 @@ Add the following to the `cilium` DaemonSet under `initContainers` as the first 
 You can deploy as a separate DaemonSet, but keep in mind that there can be a race condition between Cilium, our portmap DaemonSet, and any workloads/pods you deploy at the same time. If you see that your `hostPort` is not in effect, you may have to restart the pod for Cilium/CNI to detect it and add the necessary `iptables` rule. 
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/snormore/cilium-portmap/master/daemonset.yaml
+kubectl apply -f https://raw.githubusercontent.com/snormore/cilium-portmap/master/DaemonSet/daemonset.yaml
 ```
 
 ## Example
