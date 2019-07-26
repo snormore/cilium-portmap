@@ -1,6 +1,6 @@
 If you are using Cilium and would like to use `hostPort` on your workloads (without `hostNetwork: true`), then you will need to [enable support via configuration](http://docs.cilium.io/en/v1.4/kubernetes/configuration/?highlight=portmap#enabling-hostport-support-via-cni-configuration).
 
-## Include inline the container postStart lifecycle hook
+## Include inline to the container postStart lifecycle hook
 
 We 1. tell Cilium not to drop it's own config via the `CILIUM_CNI_CONF` env, and 2. Update the `postStart` lifecycle hook where Cilium does a `/cni-install.sh` already, to include the writing of a CNI config enabling portmap.
 
