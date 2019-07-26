@@ -1,6 +1,55 @@
-If you are using Cilium and would like to use `hostPort` on your workloads (without `hostNetwork: true`), then you will need to [enable support via configuration](http://docs.cilium.io/en/v1.4/kubernetes/configuration/?highlight=portmap#enabling-hostport-support-via-cni-configuration). This Docker image does exactly that by adding a `/etc/cni/net.d/00-cilium-portmap.conflist` to every node in your Kubernetes cluster.
+If you are using Cilium and would like to use `hostPort` on your workloads (without `hostNetwork: true`), then you will need to [enable support via configuration](http://docs.cilium.io/en/v1.4/kubernetes/configuration/?highlight=portmap#enabling-hostport-support-via-cni-configuration).
 
-## Deploy as an initContainer
+## Include inline the container postStart lifecycle hook
+
+We 1. tell Cilium not to drop it's own config via the `CILIUM_CNI_CONF` env, and 2. Update the `postStart` lifecycle hook where Cilium does a `/cni-install.sh` already, to include the writing of a CNI config enabling portmap.
+
+```
+kubectl edit ds cilium -n kube-system
+```
+
+Add this under the container `env`
+```yaml
+# We drop our own CNI config with portmap enabled, so this tells
+# Cilium not to write one.
+- name: CILIUM_CNI_CONF
+    value: /dev/null
+```
+
+Replace this
+
+```yaml
+lifecycle:
+    postStart:
+    exec:
+        command:
+        - /cni-install.sh
+    preStop:
+    exec:
+        command:
+        - /cni-uninstall.sh
+```
+
+with
+
+```yaml
+lifecycle:
+    postStart:
+    exec:
+        command:
+        - sh
+        - -c
+        - "echo '{\"cniVersion\": \"0.3.1\", \"name\": \"portmap\", \"plugins\": [{\"name\": \"cilium\", \"type\": \"cilium-cni\"}, {\"type\": \"portmap\", \"capabilities\": {\"portMappings\": true}}]}' > /host/etc/cni/net.d/05-cilium.conflist && /cni-install.sh"
+    preStop:
+    exec:
+        command:
+        - sh
+        - -c
+        - "/cni-uninstall.sh && rm /host/etc/cni/net.d/05-cilium.conflist"
+```
+
+
+## Deploy as an initContainer (outdated)
 
 The most reliable way to install this is as an `initContainer` on the existing Cilium agent Daemonset.
 
@@ -14,7 +63,7 @@ Add the following to the `cilium` DaemonSet under `initContainers` as the first 
           name: etc-cni-netd
 ```
 
-## Deploy as a DaemonSet
+## Deploy as a DaemonSet (outdated)
 
 You can deploy as a separate DaemonSet, but keep in mind that there can be a race condition between Cilium, our portmap DaemonSet, and any workloads/pods you deploy at the same time. If you see that your `hostPort` is not in effect, you may have to restart the pod for Cilium/CNI to detect it and add the necessary `iptables` rule. 
 
@@ -22,7 +71,7 @@ You can deploy as a separate DaemonSet, but keep in mind that there can be a rac
 kubectl apply -f https://raw.githubusercontent.com/snormore/cilium-portmap/master/DaemonSet/daemonset.yaml
 ```
 
-## Example
+## Example (outdated)
 
 Let's say you want to deploy a workload that looks something like this:
 
